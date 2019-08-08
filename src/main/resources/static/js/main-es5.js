@@ -5270,7 +5270,6 @@ var ApiService = /** @class */ (function () {
     };
     ApiService.prototype.handleError = function (error) {
         console.log('error:', error);
-        alert('ups :(');
     };
     var ApiService_1;
     ApiService.ctorParameters = function () { return [
@@ -5389,7 +5388,7 @@ __webpack_require__.r(__webpack_exports__);
 // The list of file replacements can be found in `angular.json`.
 var environment = {
     production: false,
-    url: "http://localhost:8080/"
+    url: "https://willcar.herokuapp.com/"
 };
 /*
  * For easier debugging in development mode, you can import the following file
