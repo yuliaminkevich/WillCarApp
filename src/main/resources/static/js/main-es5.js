@@ -250,7 +250,7 @@ module.exports = "<div *ngIf=\"valid()\">\r\n<div class=\"trip\">\r\n    <div cl
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<nav class=\"nav-list\">\r\n  <button (click)=\"goToProfile()\" mat-stroked-button color=\"warn\">{{profileNavItems.userProfile}}</button>\r\n  <button mat-stroked-button color=\"warn\" (click)=\"goToMyMessages()\">{{profileNavItems.userMessages}}</button>\r\n  <button (click)=\"goToMyBookings()\"  mat-stroked-button color=\"warn\">{{profileNavItems.userBookings}}</button>\r\n  <button (click)=\"goToMyProposed()\" mat-stroked-button color=\"warn\">{{profileNavItems.userProposedTrips}}</button>\r\n  <button (click)=\"goToAdminTab()\" mat-stroked-button color=\"warn\" *ngIf=\"isAdmin\">{{profileNavItems.adminTab}}</button>\r\n  <button (click)=\"goToAuthorization()\" mat-stroked-button color=\"warn\">{{profileNavItems.menuExit}}</button>\r\n</nav>\r\n\r\n"
+module.exports = "<nav class=\"nav-list\">\r\n  <button (click)=\"goToProfile()\" mat-stroked-button color=\"warn\">{{profileNavItems.userProfile}}</button>\r\n  <button mat-stroked-button color=\"warn\" (click)=\"goToMyMessages()\">{{profileNavItems.userMessages}}</button>\r\n  <button (click)=\"goToMyBookings()\"  mat-stroked-button color=\"warn\">{{profileNavItems.userBookings}}</button>\r\n  <button (click)=\"goToMyProposed()\" mat-stroked-button color=\"warn\">{{profileNavItems.userProposedTrips}}</button>\r\n  <button (click)=\"goToAdminTab()\" mat-stroked-button color=\"warn\" *ngIf=\"isAdmin\">{{profileNavItems.adminTab}}</button>\r\n  <button (click)=\"logOut()\" mat-stroked-button color=\"warn\">{{profileNavItems.menuExit}}</button>\r\n</nav>\r\n\r\n"
 
 /***/ }),
 
@@ -3862,10 +3862,9 @@ var MenuComponent = /** @class */ (function () {
     MenuComponent.prototype.logOut = function () {
         this.profileApiService.logOut()
             .subscribe(function () {
-            return window.location.href = 'http://localhost:4200/login';
+            return window.location.href = 'https://willcar.herokuapp.com/login';
         });
     };
-    ;
     MenuComponent.ctorParameters = function () { return [
         { type: _angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"] },
         { type: _api_profile_profile_api_service__WEBPACK_IMPORTED_MODULE_4__["ProfileApiService"] },
@@ -4068,14 +4067,12 @@ var ProfileMenuComponent = /** @class */ (function () {
     ProfileMenuComponent.prototype.goToAdminTab = function () {
         this.router.navigate(['/personalarea/', 'admin-tab']);
     };
-    // goToAuthorization() {
-    //   this.profileApiService.logOut('')
-    //     .subscribe(() => {
-    //       window.location.href = 'localhost:8080/login';
-    //     }, () => {
-    //       window.location.href = 'localhost:8080/login';
-    //     });
-    // }
+    ProfileMenuComponent.prototype.logOut = function () {
+        this.profileApiService.logOut()
+            .subscribe(function () {
+            return window.location.href = 'https://willcar.herokuapp.com/login';
+        });
+    };
     ProfileMenuComponent.prototype.ngOnInit = function () {
     };
     ProfileMenuComponent.ctorParameters = function () { return [
@@ -5230,7 +5227,7 @@ __webpack_require__.r(__webpack_exports__);
 var ApiService = /** @class */ (function () {
     function ApiService(httpClient) {
         this.httpClient = httpClient;
-        this.url = 'http://localhost:8080/';
+        this.url = 'https://willcar.herokuapp.com/';
         var headers = new _angular_common_http__WEBPACK_IMPORTED_MODULE_2__["HttpHeaders"]();
         headers = headers.append('Content-Type', 'application/json');
         headers = headers.append('Access-Control-Allow-Credentials', 'true');

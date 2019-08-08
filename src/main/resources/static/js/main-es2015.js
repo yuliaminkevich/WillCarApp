@@ -250,7 +250,7 @@ module.exports = "<div *ngIf=\"valid()\">\r\n<div class=\"trip\">\r\n    <div cl
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<nav class=\"nav-list\">\r\n  <button (click)=\"goToProfile()\" mat-stroked-button color=\"warn\">{{profileNavItems.userProfile}}</button>\r\n  <button mat-stroked-button color=\"warn\" (click)=\"goToMyMessages()\">{{profileNavItems.userMessages}}</button>\r\n  <button (click)=\"goToMyBookings()\"  mat-stroked-button color=\"warn\">{{profileNavItems.userBookings}}</button>\r\n  <button (click)=\"goToMyProposed()\" mat-stroked-button color=\"warn\">{{profileNavItems.userProposedTrips}}</button>\r\n  <button (click)=\"goToAdminTab()\" mat-stroked-button color=\"warn\" *ngIf=\"isAdmin\">{{profileNavItems.adminTab}}</button>\r\n  <button (click)=\"goToAuthorization()\" mat-stroked-button color=\"warn\">{{profileNavItems.menuExit}}</button>\r\n</nav>\r\n\r\n"
+module.exports = "<nav class=\"nav-list\">\r\n  <button (click)=\"goToProfile()\" mat-stroked-button color=\"warn\">{{profileNavItems.userProfile}}</button>\r\n  <button mat-stroked-button color=\"warn\" (click)=\"goToMyMessages()\">{{profileNavItems.userMessages}}</button>\r\n  <button (click)=\"goToMyBookings()\"  mat-stroked-button color=\"warn\">{{profileNavItems.userBookings}}</button>\r\n  <button (click)=\"goToMyProposed()\" mat-stroked-button color=\"warn\">{{profileNavItems.userProposedTrips}}</button>\r\n  <button (click)=\"goToAdminTab()\" mat-stroked-button color=\"warn\" *ngIf=\"isAdmin\">{{profileNavItems.adminTab}}</button>\r\n  <button (click)=\"logOut()\" mat-stroked-button color=\"warn\">{{profileNavItems.menuExit}}</button>\r\n</nav>\r\n\r\n"
 
 /***/ }),
 
@@ -3740,9 +3740,8 @@ let MenuComponent = class MenuComponent {
     }
     logOut() {
         this.profileApiService.logOut()
-            .subscribe(() => window.location.href = 'http://localhost:4200/login');
+            .subscribe(() => window.location.href = 'https://willcar.herokuapp.com/login');
     }
-    ;
 };
 MenuComponent.ctorParameters = () => [
     { type: _angular_router__WEBPACK_IMPORTED_MODULE_2__["Router"] },
@@ -3939,14 +3938,10 @@ let ProfileMenuComponent = class ProfileMenuComponent {
     goToAdminTab() {
         this.router.navigate(['/personalarea/', 'admin-tab']);
     }
-    // goToAuthorization() {
-    //   this.profileApiService.logOut('')
-    //     .subscribe(() => {
-    //       window.location.href = 'localhost:8080/login';
-    //     }, () => {
-    //       window.location.href = 'localhost:8080/login';
-    //     });
-    // }
+    logOut() {
+        this.profileApiService.logOut()
+            .subscribe(() => window.location.href = 'https://willcar.herokuapp.com/login');
+    }
     ngOnInit() {
     }
 };
@@ -5031,7 +5026,7 @@ var ApiService_1;
 let ApiService = ApiService_1 = class ApiService {
     constructor(httpClient) {
         this.httpClient = httpClient;
-        this.url = 'http://localhost:8080/';
+        this.url = 'https://willcar.herokuapp.com/';
         let headers = new _angular_common_http__WEBPACK_IMPORTED_MODULE_2__["HttpHeaders"]();
         headers = headers.append('Content-Type', 'application/json');
         headers = headers.append('Access-Control-Allow-Credentials', 'true');
