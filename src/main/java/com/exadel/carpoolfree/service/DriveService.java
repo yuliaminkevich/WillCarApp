@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +29,19 @@ public class DriveService {
     private final DriveRepository driveRepository;
     private final PassengerDriveRepository passengerDriveRepository;
     private final MessageRepository messageRepository;
+    private final ChatService chatService;
+    private final NotificationService notificationService;
 
 
     public DriveService(DriveRepository driveRepository,
-                        PassengerDriveRepository passengerDriveRepository, MessageRepository messageRepository) {
+                        PassengerDriveRepository passengerDriveRepository,
+                        MessageRepository messageRepository,
+                        ChatService chatService, NotificationService notificationService) {
         this.driveRepository = driveRepository;
         this.passengerDriveRepository = passengerDriveRepository;
         this.messageRepository = messageRepository;
+        this.chatService = chatService;
+        this.notificationService = notificationService;
     }
 
     public List<DriveVO> findAllDrives(){
@@ -55,7 +60,8 @@ public class DriveService {
         List<DriveVO> result = this.findAllByDriverId(userId);
         List<DriveVO> result2 = this.findAllByPassengerId(userId);
         result.addAll(result2);
-        return result.stream().sorted(Comparator.comparing(DriveVO::getStartTime).reversed()).collect(Collectors.toList());
+        result.stream().sorted(Comparator.comparing(DriveVO::getStartTime).reversed());
+        return result;
     }
 
     public List<DriveVO> findAllByStartTime(final String stTime) {
@@ -63,13 +69,22 @@ public class DriveService {
         List<Drive> drives = driveRepository.findAllDriveInFuture(startTime.minusHours(1));
         return drives.stream()
                 .filter(drive -> drive.getStartTime().isBefore(startTime.plusHours(1))&&
-                        drive.getStartTime().isAfter(startTime.minusHours(1)))
+                        drive.getStartTime().isAfter(startTime.minusHours(1)) && !drive.isArchive())
+                .map(drive -> convertToVO(drive))
+                .collect(Collectors.toList());
+    }
+
+    public List<DriveVO> findAllByDateRange(final String stTime, final String finTime) {
+        LocalDateTime startTime = LocalDateTime.parse(stTime, DateTimeFormatter.ISO_DATE_TIME);
+        LocalDateTime finalTime = LocalDateTime.parse(finTime, DateTimeFormatter.ISO_DATE_TIME);
+        List<Drive> drives = driveRepository.findAllDriveInDateRange(startTime, finalTime);
+        return drives.stream()
                 .map(drive -> convertToVO(drive))
                 .collect(Collectors.toList());
     }
 
     public List<DriveVO> findAllByDriverId(final Long driverId) {
-        List<PassengerDrive> passengerDriveList = passengerDriveRepository.findAllByDriverId(driverId);
+         List<PassengerDrive> passengerDriveList = passengerDriveRepository.findAllByDriverId(driverId);
         Map<Drive, List<PassengerDrive>> driveListMap
                 = passengerDriveList.stream()
                 .collect(Collectors.groupingBy(PassengerDrive::getDrive));
@@ -82,18 +97,36 @@ public class DriveService {
                 return userVO;
             }).collect(Collectors.toList());
             List<Message> messages = messageRepository.findAllByDriveId(drive.getId());
+            if (drive.getEndTime().isBefore(LocalDateTime.now())&&!drive.isArchive()) {
+                this.deleteById(drive.getId());
+            }
             DriveVO driveVO = convertToVO(drive);
             driveVO.setPassengers(passengers);
             driveVO.setMessages(messages);
             return driveVO;
         }).collect(Collectors.toList());
-        return result;
+        List<DriveVO> allDrives = driveRepository.findByDriverId(driverId).stream().map(drive -> {
+            if (drive.getEndTime().isBefore(LocalDateTime.now())&&!drive.isArchive()) {
+                this.deleteById(drive.getId());
+            }
+            List<Message> messages = messageRepository.findAllByDriveId(drive.getId());
+            DriveVO driveVO = convertToVO(drive);
+            driveVO.setMessages(messages);
+            return driveVO;
+        }).collect(Collectors.toList());
+        allDrives.removeAll(result);
+        allDrives.addAll(result);
+        allDrives.stream().sorted(Comparator.comparing(DriveVO::getStartTime).reversed());
+        return allDrives;
     }
 
     public List<DriveVO> findAllByPassengerId(final  Long passengerId) {
         List<PassengerDrive> passengerDriveList = passengerDriveRepository.findAllByPassengerId(passengerId);
         List<DriveVO> result = passengerDriveList.stream()
                 .map(temp -> {
+                    if (temp.getDrive().getEndTime().isBefore(LocalDateTime.now())&& !temp.getDrive().isArchive()) {
+                        this.deleteById(temp.getDrive().getId());
+                    }
                     UserVO driverVO = modelMapper.map(temp.getDrive().getDriver(), UserVO.class);
                     List<Message> messages = messageRepository.findAllByDriveId(temp.getDrive().getId());
                     DriveVO driveVO = convertToVO(temp.getDrive());
@@ -103,7 +136,7 @@ public class DriveService {
                     driveVO.setMessages(messages);
                     return driveVO;
                 }).collect(Collectors.toList());
-
+        result.stream().sorted(Comparator.comparing(DriveVO::getStartTime).reversed());
         return result;
     }
 
@@ -124,17 +157,17 @@ public class DriveService {
                         firstCoordinate = Arrays.stream(temp).collect((Collectors.toList())).indexOf(firstFiding);
                         secondCoordinate = Arrays.stream(temp).collect((Collectors.toList())).indexOf(secondFiding);
                         } catch (JsonParseException e){
-                            new RuntimeException("Drive not found");
+                            throw new RuntimeException("Drive not found");
                         } catch (IOException e){
-                            new RuntimeException("Drive not found");
+                            throw new RuntimeException("Drive not found");
                         }
                         return firstFiding!=null && secondFiding!=null && firstCoordinate<=secondCoordinate;
                     })
                     .collect(Collectors.toList());
         } catch (JsonParseException e){
-            new RuntimeException("Drive not found");
+            throw new RuntimeException("Drive not found");
         } catch (IOException e){
-            new RuntimeException("Drive not found");
+            throw new RuntimeException("Drive not found");
         }
          return drives;
     }
@@ -147,15 +180,25 @@ public class DriveService {
     public DriveVO updateDrive(Long id, String path) {
         return driveRepository.findById(id)
                 .map(drive1 -> {
-                    drive1.setPath(path);
+                    if(!drive1.isArchive()) {
+                        drive1.setPath(path);
+                        chatService.sendNotification("Driver has updated the route!", id, drive1.getDriver());
+                       // notificationService.sendNotification(drive1.getDriver());
+                    }
                     return convertToVO(driveRepository.save(drive1));
                 })
                 .orElseThrow((() -> new RuntimeException("Drive not found")));
     }
 
     public void deleteById(final Long id) {
-        passengerDriveRepository.deleteByDriveId(id);
-        driveRepository.deleteById(id);
+        driveRepository.findById(id)
+                .map(drive1 -> {
+                    drive1.setArchive(true);
+                    chatService.sendNotification("Driver has deleted the route!", id, drive1.getDriver());
+                   // notificationService.sendNotification(drive1.getDriver());
+                    return convertToVO(driveRepository.save(drive1));
+                })
+                .orElseThrow((() -> new RuntimeException("Drive not found")));
     }
 
     private DriveVO convertToVO(Drive drive) {
@@ -172,7 +215,6 @@ public class DriveService {
         double distance = 2*6371*Math.asin(Math.sqrt(squareLatitude +
                 Math.cos(firstPoint[0])*Math.cos(secondPoint[0])*
                 squareLongitude));
-        System.out.println(distance + " ");
         return distance <= 1;
     }
 }

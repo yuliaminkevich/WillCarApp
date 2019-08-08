@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class DriveVO {
 
@@ -31,6 +32,10 @@ public class DriveVO {
 
     private String pickUpPoint;
 
+    private boolean archive = false;
+
+    private String segmentsCoords;
+
     private List<Message> messages = new ArrayList<>();
 
     private List<UserVO> passengers = new LinkedList<>();
@@ -39,7 +44,11 @@ public class DriveVO {
     public DriveVO() {
     }
 
-    public DriveVO(LocalDateTime startTime, LocalDateTime endTime, int freePlaceCount, UserVO driver, String path, String startPoint, String finPoint, List<Message> messages) {
+    public DriveVO(LocalDateTime startTime, LocalDateTime endTime,
+                   int freePlaceCount, UserVO driver, String path,
+                   String startPoint, String finPoint, List<Message> messages,
+                   Double sunOfKm, String name, String pickUpPoint,
+                   boolean archive, List<UserVO> passengers) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.freePlaceCount = freePlaceCount;
@@ -47,7 +56,13 @@ public class DriveVO {
         this.path = path;
         this.startPoint = startPoint;
         this.finPoint = finPoint;
+        this.segmentsCoords = segmentsCoords;
         this.messages = messages;
+        this.sumOfKm = sunOfKm;
+        this.name = name;
+        this.pickUpPoint = pickUpPoint;
+        this.archive = archive;
+        this.passengers = passengers;
     }
 
     public Long getId() {
@@ -90,6 +105,30 @@ public class DriveVO {
         return finPoint;
     }
 
+    public Double getSumOfKm() {
+        return sumOfKm;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPickUpPoint() {
+        return pickUpPoint;
+    }
+
+    public String getSegmentsCoords() {
+        return segmentsCoords;
+    }
+
+    public boolean isArchive() {
+        return archive;
+    }
+
+    public void setArchive(boolean archive) {
+        this.archive = archive;
+    }
+
     public void setFinPoint(String finPoint) {
         this.finPoint = finPoint;
     }
@@ -130,27 +169,34 @@ public class DriveVO {
         this.startTime = startTime;
     }
 
-    public Double getSumOfKm() {
-        return sumOfKm;
-    }
 
     public void setSumOfKm(Double sumOfKm) {
         this.sumOfKm = sumOfKm;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public String getPickUpPoint() {
-        return pickUpPoint;
-    }
 
     public void setPickUpPoint(String pickUpPoint) {
         this.pickUpPoint = pickUpPoint;
+    }
+
+    public void setSegmentsCoords(String segmentsCoords) {
+        this.segmentsCoords = segmentsCoords;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DriveVO driveVO = (DriveVO) o;
+        return id.equals(driveVO.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

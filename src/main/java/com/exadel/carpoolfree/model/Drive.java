@@ -59,9 +59,14 @@ public class Drive {
     @Column(name = "pathVO")
     private String path;
 
+    @Column(name = "archive")
+    private boolean archive = false;
+
+    @Column(name = "segments_coords")
+    private String segmentsCoords;
+
     @OneToMany()
     private List<Message> messages;
-
 
     public Drive(LocalDateTime startTime, LocalDateTime endTime, int freePlaceCount, User driver, String path, String startPoint, String finPoint) {
         this.startTime = startTime;
@@ -71,5 +76,13 @@ public class Drive {
         this.path = path;
         this.startPoint = startPoint;
         this.finPoint = finPoint;
+    }
+
+    public boolean isArchive() {
+        return archive;
+    }
+
+    public void setArchive(boolean archive) {
+        this.archive = archive;
     }
 }

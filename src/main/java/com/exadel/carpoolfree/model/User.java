@@ -32,9 +32,6 @@ import java.util.Set;
 @Table(name = "user")
 public class User {
 
-    @Column
-    private boolean active;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -56,6 +53,9 @@ public class User {
     @Column
     private String password;
 
+    @Column
+    private boolean active;
+
     @Column(name = "pref_communication")
     private String prefCommunication;
 
@@ -70,16 +70,20 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
 
+    public User(Long id){
+        this.id = id;
+    }
+
     @Column(name = "driver_rating")
-    private Long driverRating;
+    private double driverRating;
 
     @Column(name = "passenger_rating")
-    private Long passengerRating;
+    private double passengerRating;
 
     @OneToMany(
             mappedBy = "userId",
             cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
+            fetch = FetchType.EAGER,
             orphanRemoval = true
     )
     private List<Car> cars = new ArrayList<>();
@@ -94,10 +98,9 @@ public class User {
         this.password = password;
     }
 
-
     public User(String name, String phoneNumber, String email,
-                String login, String password, boolean active, Long driverRating,
-                Long passengerRating) {
+                String login, String password, boolean active, double driverRating,
+                double  passengerRating) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.email = email;
